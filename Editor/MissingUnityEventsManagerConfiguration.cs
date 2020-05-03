@@ -49,7 +49,7 @@ namespace Assets.MissingUnityEvents.Editor
         public string GetIlWeaverPluginFolder()
         {
             var thisFilePath = AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject(EditorWindow.GetWindow<MissingUnityEventsManagerEditorWindow>()));
-            var ilWeaverPluginFolder = thisFilePath.Substring(0, thisFilePath.LastIndexOf("/")) + "/Plugins";
+            var ilWeaverPluginFolder = thisFilePath.Substring(0, thisFilePath.LastIndexOf("/")) + "/Plugins~";
             return ilWeaverPluginFolder;
         }
     }
