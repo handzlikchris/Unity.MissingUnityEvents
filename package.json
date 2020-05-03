@@ -1,0 +1,7 @@
+{
+    "name": "uk.co.reliable-solutions.missingunityevents",
+    "displayName": "Missing Unity Events",
+    "version": "1.0.0",
+    "unity": "2018.3",
+    "description": "Editor extension to generate events that are executed before property set, eg. Transform-position, Transform-rotation, Transform-parent which allows to write more event driven code or debug property changes that are not simple to track down. Easily customisable to allow adding events to different property setters / types."
+}
