@@ -35,6 +35,7 @@ namespace Assets.MissingUnityEvents.Editor
         //    editor.RemoveConfig();
         //}
 
+        private object _typeToPropertiesMapGeneratingLock = new object();
         private Dictionary<Type, List<PropertyInfo>> _typeToPropertiesMap;
         public Dictionary<Type, List<PropertyInfo>> TypeToPropertiesMap
         {
@@ -42,13 +43,15 @@ namespace Assets.MissingUnityEvents.Editor
             {
                 if (_typeToPropertiesMap == null)
                 {
-                    _typeToPropertiesMap = typeof(Transform).Assembly.GetTypes().ToDictionary(t => t,
-                        t => t.GetProperties(BindingFlags.Public
-                                             | BindingFlags.Instance
-                                             | BindingFlags.DeclaredOnly)
-                            .Where(p => p.CanRead && p.CanWrite 
-                                                  && p.GetMethod?.MethodImplementationFlags == MethodImplAttributes.Managed && 
-                                                  p.SetMethod?.MethodImplementationFlags == MethodImplAttributes.Managed).ToList());
+                    _typeToPropertiesMap = AppDomain.CurrentDomain.GetAssemblies().Where(a => a.FullName.StartsWith("Unity")).ToList()
+                        .SelectMany(a => a.GetTypes()).ToDictionary(t => t,
+                            t => t.GetProperties(BindingFlags.Public
+                                                 | BindingFlags.Instance
+                                                 | BindingFlags.DeclaredOnly)
+                                .Where(p => p.CanRead && p.CanWrite
+                                                      && p.GetMethod?.MethodImplementationFlags == MethodImplAttributes.Managed &&
+                                                      p.SetMethod?.MethodImplementationFlags == MethodImplAttributes.Managed).ToList()
+                        );
                 }
                 return _typeToPropertiesMap;
             }
@@ -56,6 +59,11 @@ namespace Assets.MissingUnityEvents.Editor
 
         void Awake()
         {
+        }
+
+        private string GetAssemblyName(Assembly assy)
+        {
+            return assy.FullName.Split(new[] {","}, StringSplitOptions.RemoveEmptyEntries)[0];
         }
 
         protected override void OnGUIInternal()
@@ -105,6 +113,16 @@ namespace Assets.MissingUnityEvents.Editor
                 ExecuteGenerateHelperClasses();
             }
             GUILayout.Space(10);
+        }
+
+        private void EnsureEventConfigEntriesHaveCorrectDllModuleHydrated()
+        {
+            foreach (var eventConfigEventConfigurationEntry in _config.EventConfigurationEntries)
+            {
+                eventConfigEventConfigurationEntry.DllName = GetAssemblyName(
+                    TypeToPropertiesMap.First(t => t.Key.Name == eventConfigEventConfigurationEntry.ObjectType).Key.Assembly
+                );
+            }
         }
 
         private void CreateTargetDefinitionEditor()
@@ -172,6 +190,7 @@ namespace Assets.MissingUnityEvents.Editor
             }
             else
             {
+                EnsureEventConfigEntriesHaveCorrectDllModuleHydrated();
                 RunWeavingExecutable(EventILWeaverCommandLineArgsGenerator.GenerateCreateHelperClassesArgs(_config), false);
             }
         }
@@ -179,7 +198,8 @@ namespace Assets.MissingUnityEvents.Editor
         private void ExecuteRevertDllToOriginal()
         {
             EnsurePluginSelected();
-            RunWeavingExecutable(EventILWeaverCommandLineArgsGenerator.GenerateRevertToOriginalCommandLineArgs(), true);
+            EnsureEventConfigEntriesHaveCorrectDllModuleHydrated();
+            RunWeavingExecutable(EventILWeaverCommandLineArgsGenerator.GenerateRevertToOriginalCommandLineArgs(_config), true);
             _config.HelperClassForceUseNoBuildSymbolInEditor = true;
         }
 
@@ -187,6 +207,7 @@ namespace Assets.MissingUnityEvents.Editor
         {
             EnsurePluginSelected();
 
+            EnsureEventConfigEntriesHaveCorrectDllModuleHydrated();
             RunWeavingExecutable(EventILWeaverCommandLineArgsGenerator.GenerateAddEventsCommandLineArgs(_config), true);
 
             _config.HelperClassForceUseNoBuildSymbolInEditor = false;

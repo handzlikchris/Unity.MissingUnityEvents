@@ -8,30 +8,25 @@ namespace Assets.MissingUnityEvents.Editor
     public class EventILWeaverCommandLineArgsGenerator
     {
         private const string MultipleItemsForArgCommandLineDelimiter = ";";
-        public const string UnityCoreModuleDllName = "UnityEngine.CoreModule.dll";
 
-        public static string GenerateRevertToOriginalCommandLineArgs()
+        public static string GenerateRevertToOriginalCommandLineArgs(MissingUnityEventsManagerConfiguration config)
         {
-            var unityCoreDllPaths = GetUnityCoreDllPaths();
-
             return $"revert-to-original " +
-                   $"-t \"{string.Join(MultipleItemsForArgCommandLineDelimiter, unityCoreDllPaths)}\"";
+                   $"-t \"{string.Join(MultipleItemsForArgCommandLineDelimiter, GetUnityRequiredDllPaths(config, false))}\"";
 
         }
 
         public static string GenerateAddEventsCommandLineArgs(MissingUnityEventsManagerConfiguration config)
         {
-            var unityCoreDllPaths = GetUnityCoreDllPaths();
-
             return $"add-events " +
-                   $"-t \"{string.Join(MultipleItemsForArgCommandLineDelimiter, unityCoreDllPaths)}\" " +
-                   $"--target-definitions {string.Join(MultipleItemsForArgCommandLineDelimiter, config.EventConfigurationEntries.Select(c => $"{c.ObjectType}-{c.PropertyName}"))}";
+                   $"-t \"{string.Join(MultipleItemsForArgCommandLineDelimiter, GetUnityRequiredDllPaths(config, false))}\" " +
+                   $"--target-definitions {string.Join(MultipleItemsForArgCommandLineDelimiter, config.EventConfigurationEntries.Select(c => $"{c.ObjectType}-{c.PropertyName}-{c.DllName}"))}";
         }
 
         public static string GenerateCreateHelperClassesArgs(MissingUnityEventsManagerConfiguration config)
         {
             return $"generate-helper-code " +
-                   $"-t \"{UnityCoreAssemblyPath}\" " +
+                   $"-t \"{string.Join(MultipleItemsForArgCommandLineDelimiter, GetUnityRequiredDllPaths(config, true))}\" " +
                    $"-o \"{config.HelperClassFilePath}\" " +
                    $"-n \"{config.HelperClassNamespace}\" " +
                    $"--using-statements System:UnityEngine " +
@@ -39,16 +34,25 @@ namespace Assets.MissingUnityEvents.Editor
                    $"--include-custom-code-when-no-build-symbol \"{config.HelperClassIncludeCustomCodeWhenNoBuildSymbol.Replace("\"", "\\\"")}\"";
         }
 
-        private static List<FileInfo> GetUnityCoreDllPaths()
+        private static List<FileInfo> GetUnityRequiredDllPaths(MissingUnityEventsManagerConfiguration config, bool singlePerDllType)
         {
-            var unityCoreDllPaths = new DirectoryInfo(UnityEditorDataDirectoryPath)
-                .GetFiles(UnityCoreModuleDllName, SearchOption.AllDirectories)
-                .Where(p => p.FullName != UnityCoreAssemblyPath)
-                .ToList();
-            return unityCoreDllPaths;
+            var unityRequiredDllPaths = config.EventConfigurationEntries.Select(c => c.DllName).GroupBy(d => d).Select(g => g.First())
+                .SelectMany(dllName =>
+                    new DirectoryInfo(UnityEditorDataDirectoryPath)
+                    .GetFiles(dllName + ".dll", SearchOption.AllDirectories)
+                ).ToList();
+
+            if (singlePerDllType)
+            {
+                unityRequiredDllPaths = unityRequiredDllPaths
+                    .GroupBy(f => f.Name)
+                    .Select(g => g.First())
+                    .ToList();
+            }
+
+            return unityRequiredDllPaths;
         }
 
-        private static string UnityCoreAssemblyPath => EditorApplication.applicationContentsPath + "/Managed/UnityEngine/" + UnityCoreModuleDllName;
         private static string UnityEditorDataDirectoryPath => EditorApplication.applicationContentsPath;
     }
 }
