@@ -21,7 +21,7 @@ This tool can add those events to Unity DLLs enabling you to use them as you wou
 ## Approach
 Tool uses `IL Weaving` and will add specified `Events` directly to Unity DLLs, both for `Editor` and `Builds`. These are standard events, nothing different from writing them out by hand. Usage and performance will be in line with what you'd expect from manually created events. 
 
-> **Since DLL IL code is modified you want to check with your Unity License if that's allowed. Tool and docs are provided for educational purposes.**
+> **Since DLL IL code is modified you want to check with your Unity License if that's allowed. Tool and docs are provided for educational purposes. Tool can be found at https://github.com/handzlikchris/AddingEventsToCompiled3rdPartyLibrary**
 
 ## Usage
 
