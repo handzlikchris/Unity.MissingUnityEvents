@@ -16,13 +16,13 @@ namespace Assets.MissingUnityEvents.Editor
 
         private int _windowWidthPx;
 
-        [MenuItem("Missing Unity Events/Run")]
+        [MenuItem("Tools/Missing Unity Events/Run")]
         public static void ExecuteShowWindowMenuAction()
         {
             GetWindow<MissingUnityEventsManagerEditorWindow>(false, "Missing Unity Events");
         }
 
-        [MenuItem("Missing Unity Events/Recreate Config")]
+        [MenuItem("Tools/Missing Unity Events/Recreate Config")]
         public static void ExecuteRecreateConfigMenuAction()
         {
             var editor = GetWindow<MissingUnityEventsManagerEditorWindow>(false, "Missing Unity Events");
