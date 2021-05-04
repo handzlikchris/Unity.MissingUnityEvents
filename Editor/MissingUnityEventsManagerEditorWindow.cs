@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 using File = UnityEngine.Windows.File;
 
 namespace Assets.MissingUnityEvents.Editor
@@ -241,6 +242,7 @@ namespace Assets.MissingUnityEvents.Editor
             proc.StartInfo.FileName = _config.IlWeaverPluginExecutablePath;
             proc.StartInfo.UseShellExecute = true;
             if (runAsAdministrator) proc.StartInfo.Verb = "runas";
+            Debug.Log($"Running weaving DLL with arguments: '{commandLineArgs}'");
             proc.StartInfo.Arguments = commandLineArgs;
             proc.Start();
         }

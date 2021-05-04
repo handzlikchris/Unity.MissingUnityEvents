@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
+using UnityEngine;
 
 namespace Assets.MissingUnityEvents.Editor
 {
@@ -34,23 +36,51 @@ namespace Assets.MissingUnityEvents.Editor
                    $"--include-custom-code-when-no-build-symbol \"{config.HelperClassIncludeCustomCodeWhenNoBuildSymbol.Replace("\"", "\\\"")}\"";
         }
 
-        private static List<FileInfo> GetUnityRequiredDllPaths(MissingUnityEventsManagerConfiguration config, bool singlePerDllType)
+        private static List<string> GetUnityRequiredDllPaths(MissingUnityEventsManagerConfiguration config, bool singlePerDllType)
         {
-            var unityRequiredDllPaths = config.EventConfigurationEntries.Select(c => c.DllName).GroupBy(d => d).Select(g => g.First())
-                .SelectMany(dllName =>
-                    new DirectoryInfo(UnityEditorDataDirectoryPath)
-                    .GetFiles(dllName + ".dll", SearchOption.AllDirectories)
-                ).ToList();
+            var unityRequiredDllPaths = new List<string>();
 
+            var rootDir = new DirectoryInfo(UnityEditorDataDirectoryPath);
+            var unityRequiredDlls = config.EventConfigurationEntries.Select(c => c.DllName).GroupBy(d => d).Select(g => g.First());
+            foreach (var unityRequiredDll in unityRequiredDlls)
+            {
+                RecursivelyFindDlls(rootDir, unityRequiredDll, unityRequiredDllPaths);
+            }
+            
             if (singlePerDllType)
             {
                 unityRequiredDllPaths = unityRequiredDllPaths
-                    .GroupBy(f => f.Name)
+                    .GroupBy(f => f)
                     .Select(g => g.First())
                     .ToList();
             }
 
             return unityRequiredDllPaths;
+        }
+
+        private static void RecursivelyFindDlls(DirectoryInfo currentDir, string dllName, List<string> unityRequiredDllPaths)
+        {
+            try
+            {
+                unityRequiredDllPaths.AddRange(currentDir.GetFiles(dllName + ".dll").Select(f => f.FullName).ToList());
+                var childDirectories = currentDir.GetDirectories();
+                foreach (var childDirectory in childDirectories)
+                {
+                    RecursivelyFindDlls(childDirectory, dllName, unityRequiredDllPaths);
+                }
+            }
+            catch (DirectoryNotFoundException e)
+            {
+                Debug.Log($"Path too long for {currentDir.FullName} if there are any matching DLLs ({dllName}) they'll be excluded. This is internal windows limitation - some workarounds can be found in 'https://forum.unity.com/threads/solved-directorynotfoundexception-with-different-packages.643297/'");
+            }
+            catch (PathTooLongException e)
+            {
+                Debug.Log($"Path too long for {currentDir.FullName} if there are any matching DLLs ({dllName}) they'll be excluded. This is internal windows limitation - some workarounds can be found in 'https://forum.unity.com/threads/solved-directorynotfoundexception-with-different-packages.643297/'");
+            }
+            catch (Exception e)
+            {
+                Debug.Log($"Unknown exception - this is usually issue with path too long for {currentDir.FullName} if there are any matching DLLs ({dllName}) they'll be excluded. This is internal windows limitation - some workarounds can be found in 'https://forum.unity.com/threads/solved-directorynotfoundexception-with-different-packages.643297/'");
+            }
         }
 
         private static string UnityEditorDataDirectoryPath => EditorApplication.applicationContentsPath;
