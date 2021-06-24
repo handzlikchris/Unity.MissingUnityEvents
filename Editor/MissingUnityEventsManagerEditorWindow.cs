@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 using File = UnityEngine.Windows.File;
 
 namespace Assets.MissingUnityEvents.Editor
@@ -15,13 +16,13 @@ namespace Assets.MissingUnityEvents.Editor
 
         private int _windowWidthPx;
 
-        [MenuItem("Missing Unity Events/Run")]
+        [MenuItem("Tools/Missing Unity Events/Run")]
         public static void ExecuteShowWindowMenuAction()
         {
             GetWindow<MissingUnityEventsManagerEditorWindow>(false, "Missing Unity Events");
         }
 
-        [MenuItem("Missing Unity Events/Recreate Config")]
+        [MenuItem("Tools/Missing Unity Events/Recreate Config")]
         public static void ExecuteRecreateConfigMenuAction()
         {
             var editor = GetWindow<MissingUnityEventsManagerEditorWindow>(false, "Missing Unity Events");
@@ -241,6 +242,7 @@ namespace Assets.MissingUnityEvents.Editor
             proc.StartInfo.FileName = _config.IlWeaverPluginExecutablePath;
             proc.StartInfo.UseShellExecute = true;
             if (runAsAdministrator) proc.StartInfo.Verb = "runas";
+            Debug.Log($"Running weaving DLL with arguments: '{commandLineArgs}'");
             proc.StartInfo.Arguments = commandLineArgs;
             proc.Start();
         }
