@@ -13,6 +13,10 @@ Events directly in property setters come in handy in some situations:
 
 Unfortunately those are simply not there, if you want to respond to some changes you'll likely going to use `Update` loop of some game object.
 
+> # Making this tool better
+> I'm working on a visual transform debugger, that'll make this tool to be incredibly simple to use and will add more features. I need your help if you got 4 minutes to spare.
+> In following link https://forms.gle/SE6As64EZjTGGZHH7 there's a short video that shows POC and 2 questions to answer. Please have a look!
+
 # Adding Events back to Unity APIs
 This tool can add those events to Unity DLLs enabling you to use them as you would any other events. It's very straight forward to use and works globally, which means once you've added them they'll stay there.
 
