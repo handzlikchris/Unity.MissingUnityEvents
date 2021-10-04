@@ -16,12 +16,9 @@ Unfortunately those are simply not there, if you want to respond to some changes
 > # Making This Tool Better - Visual Transform Changes Debugger
 > I've went further with this concept and created a tool that focuses on tracking ANY changes made to ANY transforms which is then neatly laid out in friendly GUI. Check it out at:
 > https://immersiveVRTools.com/projects/transform-changes-debugger
-
-<p align="center">
-<iframe width="560" height="315" src="https://www.youtube.com/embed/6YjrgHpE2x4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</p>
-
-** Visual Transform Changes Debugger features showcase **
+> 
+> [![Visual Transform Changes Debugger](Docs~/Images/transform-changes-debugger-youtube-thumb.jpg)](https://youtu.be/6YjrgHpE2x4 "Play")
+> *features showcase video*
 
 
 # Adding Events back to Unity APIs
