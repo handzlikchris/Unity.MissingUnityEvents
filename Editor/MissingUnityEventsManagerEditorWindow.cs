@@ -69,7 +69,7 @@ namespace Assets.MissingUnityEvents.Editor
 
         protected override void OnGUIInternal()
         {
-            _windowWidthPx = Screen.width;
+            _windowWidthPx = (int)position.width;
 
             GUILayout.Label("Plugin Configuration", EditorStyles.boldLabel);
 
